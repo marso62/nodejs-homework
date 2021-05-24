@@ -71,15 +71,11 @@ function addContact(name, email, phone) {
     const contactNew = { id: shortid.generate(), name, email, phone };
     const contactsList = JSON.stringify([contactNew, ...contacts], null, "\t");
     //добавляем контакт в список
-    fs.writeFile(contactsPath, contactsList, (err) => {
+    fs.writeFile(contactsPath, contactsList, (err, data) => {
       if (err) throw err;
     });
+    console.table(JSON.parse(data));
   });
-}
-try {
-  addContact();
-} catch (error) {
-  next(error);
 }
 
 module.exports = {
