@@ -1,65 +1,85 @@
+const { X_OK } = require("constants");
+const { KeyObject } = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const shortid = require("shortid");
 
 //путь к файле contacts.json
 const contactsPath = path.join(__dirname, "./db/contacts.json");
 
-// console.log(contactsPath);
-
-// TODO: задокументировать каждую функцию
+// полный список контактов
 function listContacts() {
-  // выводит в консоль список контактов
   fs.readFile(contactsPath, "utf8", (err, data) => {
     if (err) throw err;
-    const usersAll = JSON.parse(data);
-    console.table(usersAll);
-    // return usersAll;       //почему не работает return?
+    // const usersAll = JSON.parse(data);
+    console.table(JSON.parse(data));
+    //     // return usersAll;       //почему не работает return?
   });
+  // return JSON.parse(data);
 }
 
-// console.table(listContacts());
-// listContacts();
+//________________________________________
+//Почему эта функция не работает??
+// async function listContacts() {
+//   try {
+//     const data = await fs.readFile(contactsPath, "utf8");
+//     const result = JSON.parse(data);
+//     return result;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+// const w = await listContacts();
+// console.table(w);
+//------------------------------------------
 
 //получаеm id юзера
 function getContactById(contactId) {
   fs.readFile(contactsPath, "utf8", (err, data) => {
     if (err) throw err;
-    const users = JSON.parse(data.toString());
+    const contacts = JSON.parse(data);
     //с помощью перебора массива находим id в списке контакта
-    const userByID = users.find((user) => user.id === contactId);
-    console.log(userByID);
+    const contactByID = contacts.find((contact) => contact.id === contactId);
+    console.log(contactByID);
   });
 }
 
-// getContactById(3);
-
-//получаеm id юзера
+//удаляем контакт
 function removeContact(contactId) {
   fs.readFile(contactsPath, "utf8", (err, data) => {
     if (err) throw err;
-    // перебором находим удаляемого юзера
-    const users = JSON.parse(data.toString());
-    const userByID = users.find((user) => user.id === contactId);
-    // console.table(users);
-    // console.log(userByID);
+    const contacts = JSON.parse(data);
+    //с помощью фильтра удаляем id из списка контакта
+    const notDeletedСontact = contacts.filter(
+      (contact) => contact.id !== contactId
+    );
+    console.table(notDeletedСontact);
 
-    //убираем из списка удаленного пользователя
-    const notDeletedUsers = users.filter((user) => user.id !== contactId);
-    // return notDeletedUsers;
-    console.table(notDeletedUsers);
+    // почему не переписывает контакты?
+    // fs.writeFile(contactsPath, notDeletedСontact, (err) => {
+    //   if (err) throw err;
+    // });
   });
-
-  //как удалить пользователя с json?
-  // fs.writeFile(contactsPath, notDeletedUsers, "utf8", callback);
-  // console.table(JSON.parse(data));
 }
 
-// removeContact(2);
-
+//добавляем контакт
 function addContact(name, email, phone) {
-  // fs.writeFile()
-  //   // ...твой код
-  //   console.log();
+  fs.readFile(contactsPath, "utf8", (err, data) => {
+    if (err) throw err;
+
+    const contacts = JSON.parse(data);
+    const contactNew = { id: shortid.generate(), name, email, phone };
+    const contactsList = JSON.stringify([contactNew, ...contacts], null, "\t");
+    //добавляем контакт в список
+    fs.writeFile(contactsPath, contactsList, (err) => {
+      if (err) throw err;
+    });
+  });
+}
+try {
+  addContact();
+} catch (error) {
+  next(error);
 }
 
 module.exports = {
