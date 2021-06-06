@@ -1,1 +1,1 @@
-# nodejs-homework
+# nodejs-basics
